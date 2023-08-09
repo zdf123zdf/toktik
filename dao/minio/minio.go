@@ -51,7 +51,7 @@ func uploadObject(minioClient *minio.Client, bucketName, objectName, filePath st
 	minioUrl := viper.GetString("minio.url")
 	minioPort := viper.GetString("minio.port")
 	_, err = minioClient.FPutObject(context.Background(), bucketName, objectName, filePath, minio.PutObjectOptions{})
-	if err == nil {
+	if err != nil {
 		log.Fatalln("文件上传失败:", err.Error())
 	}
 	// 返回文件链接
