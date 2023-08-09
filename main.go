@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"toktik/conf"
 	"toktik/dao/db"
+	"toktik/dao/minio"
 	"toktik/model"
 	"toktik/routes"
 )
@@ -20,11 +20,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("数据库连接成功")
 	// 自动迁移表
 	err = db.DB.AutoMigrate(&model.Video{})
 	if err != nil {
-		log.Fatal("迁移数据库失败:", err)
+		log.Fatalln("迁移数据库失败:", err)
+	}
+	// 初始化对象存储minio
+	err = minio.InitMinio()
+	if err != nil {
+		log.Fatalln("minio初始化失败:", err)
 	}
 	//注册路由
 	r := routes.InitRouter()

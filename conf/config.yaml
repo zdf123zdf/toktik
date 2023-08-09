@@ -4,3 +4,11 @@ mysql:
   dbname: toktik
   username: root
   password: 123456
+
+minio:
+  url:
+  port: 9000
+  accessKey:
+  secretKey: 
+  bucketName: toktik
+  location: us-east-1
