@@ -54,8 +54,8 @@ func GetFeed(c *gin.Context) {
 			return
 		}
 
-		// 将时间戳转换为时间格式
-		latestTime = time.Unix(timestamp, 0)
+		// 处理毫秒时间戳
+		latestTime = time.Unix(0, timestamp*int64(time.Millisecond))
 
 	} else {
 		latestTime = time.Now()
@@ -87,7 +87,7 @@ func GetFeed(c *gin.Context) {
 				CoverUrl: "https://example.com/cover/2",
 			},
 		},
-		NextTime: 1633456800,
+		NextTime: 1691644322647,
 	}
 	c.JSON(http.StatusOK, response)
 
