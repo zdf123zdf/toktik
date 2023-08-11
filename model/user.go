@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Name            string `gorm:"column:name" json:"name"`                         // 用户名称
+	Name            string `gorm:"column:name;unique" json:"name"`                  // 用户名称
 	Password        string `gorm:"column:password" json:"password"`                 // 用户密码
 	FollowCount     uint   `gorm:"column:follow_count" json:"follow_count"`         // 关注总数
 	FollowerCount   uint   `gorm:"column:follower_count" json:"follower_count"`     // 粉丝总数
