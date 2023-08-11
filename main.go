@@ -5,6 +5,7 @@ import (
 	"toktik/conf"
 	"toktik/dao/db"
 	"toktik/dao/minio"
+	"toktik/dao/redis"
 	"toktik/model"
 	"toktik/routes"
 )
@@ -25,12 +26,17 @@ func main() {
 	if err != nil {
 		log.Fatalln("迁移数据库失败:", err)
 	}
+	// redis初始化
+	err = redis.InitRedis()
+	if err != nil {
+		panic(err)
+	}
 	// 初始化对象存储minio
 	err = minio.InitMinio()
 	if err != nil {
 		log.Fatalln("minio初始化失败:", err)
 	}
-	//注册路由
+	// 注册路由
 	r := routes.InitRouter()
 	// 启动8000端口
 	errRun := r.Run(":8000")

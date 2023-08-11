@@ -12,3 +12,9 @@ minio:
   secretKey:
   bucketName: toktik
   location: us-east-1
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: 
+  db: 0
