@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatalln("minio初始化失败:", err)
 	}
-	// 注册路由
+	//注册路由
 	r := routes.InitRouter()
 	// 启动8000端口
 	errRun := r.Run(":8000")

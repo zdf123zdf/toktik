@@ -9,6 +9,6 @@ minio:
   url:
   port: 9000
   accessKey:
-  secretKey: 
+  secretKey:
   bucketName: toktik
   location: us-east-1
