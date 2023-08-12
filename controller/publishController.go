@@ -121,3 +121,59 @@ func PublishAction(c *gin.Context) {
 	response.StatusMsg = "success"
 	c.JSON(http.StatusOK, response)
 }
+
+type PublishResponse struct {
+	Response
+	VideoList []FeedVideo `json:"video_list,omitempty"`
+}
+
+// 获取视频发布列表
+func PublishList(c *gin.Context) {
+	var response PublishResponse
+	response.StatusCode = -1
+	// 获取用户ID
+	// 根据用户ID查询所有视频
+	userID := 1
+	publishList, err := service.GetPublish(uint(userID))
+	if err != nil {
+		response.StatusMsg = "视频获取失败"
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	feedVideos := make([]FeedVideo, 0)
+	for _, video := range publishList {
+		// 取出视频信息
+		// 获取作者用户信息
+		author := FeedUser{
+			Id:              video.User.ID,
+			Name:            video.User.Name,
+			FollowCount:     video.User.FollowCount,
+			FollowerCount:   video.User.FollowerCount,
+			IsFollow:        true,
+			Avatar:          video.User.Avatar,
+			BackgroundImage: video.User.BackgroundImage,
+			Signature:       video.User.Signature,
+			TotalFavorited:  video.User.TotalFavorited,
+			WorkCount:       0, // 未实现查询
+			FavoriteCount:   0, // 未实现查询
+		}
+		// 创建FeedVideo对象
+		feedVideo := FeedVideo{
+			Id:            video.ID,
+			Author:        author,
+			PlayUrl:       video.PlayUrl,
+			CoverUrl:      video.CoverUrl,
+			FavoriteCount: video.FavoriteCount,
+			CommentCount:  video.CommentCount,
+			IsFavorite:    true,
+			Title:         video.Title,
+		}
+
+		// 将FeedVideo添加到feedVideos中
+		feedVideos = append(feedVideos, feedVideo)
+	}
+	response.VideoList = feedVideos
+	response.StatusCode = 0
+	response.StatusMsg = "success"
+	c.JSON(http.StatusOK, response)
+}

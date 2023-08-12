@@ -20,6 +20,8 @@ func InitRouter() *gin.Engine {
 		douyinGroup.GET("/user/", controller.UserInfo)
 		// 视频投稿
 		douyinGroup.POST("/publish/action/", controller.PublishAction)
+		// 视频发布列表
+		douyinGroup.GET("/publish/list/", controller.PublishList)
 	}
 	return r
 }
