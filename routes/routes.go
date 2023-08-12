@@ -8,20 +8,29 @@ import (
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 	// 主路由组
-	douyinGroup := r.Group("/douyin")
+	toktikGroup := r.Group("/douyin")
 	{
 		// feed视频流
-		douyinGroup.GET("/feed/", controller.GetFeed)
-		// 注册接口
-		douyinGroup.POST("/user/register/", controller.UserRegister)
-		// 登录接口
-		douyinGroup.POST("/user/login/", controller.UserLogin)
-		// 用户接口
-		douyinGroup.GET("/user/", controller.UserInfo)
-		// 视频投稿
-		douyinGroup.POST("/publish/action/", controller.PublishAction)
-		// 视频发布列表
-		douyinGroup.GET("/publish/list/", controller.PublishList)
+		toktikGroup.GET("/feed/", controller.GetFeed)
+		// user路由组
+		userGroup := toktikGroup.Group("/user")
+		{
+			// 用户接口
+			userGroup.GET("/", controller.UserInfo)
+			// 注册接口
+			userGroup.POST("/register/", controller.UserRegister)
+			// 登录接口
+			userGroup.POST("/login/", controller.UserLogin)
+		}
+		// publish路由组
+		publishGroup := toktikGroup.Group("/publish")
+		{
+			// 视频投稿
+			publishGroup.POST("/action/", controller.PublishAction)
+			// 视频发布列表
+			publishGroup.GET("/list/", controller.PublishList)
+		}
+
 	}
 	return r
 }
