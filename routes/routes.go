@@ -17,7 +17,7 @@ func InitRouter() *gin.Engine {
 		// 登录接口
 		douyinGroup.POST("/user/login/", controller.UserLogin)
 		// 用户接口
-		douyinGroup.GET("/douyin/user/", controller.UserInfo)
+		douyinGroup.GET("/user/", controller.UserInfo)
 	}
 	return r
 }
