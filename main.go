@@ -4,7 +4,7 @@ import (
 	"log"
 	"toktik/conf"
 	"toktik/dao/db"
-	"toktik/dao/minio"
+	"toktik/dao/minioStore"
 	"toktik/dao/redis"
 	"toktik/model"
 	"toktik/routes"
@@ -32,7 +32,7 @@ func main() {
 		panic(err)
 	}
 	// 初始化对象存储minio
-	err = minio.InitMinio()
+	err = minioStore.InitMinio()
 	if err != nil {
 		log.Fatalln("minio初始化失败:", err)
 	}

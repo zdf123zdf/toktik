@@ -18,6 +18,8 @@ func InitRouter() *gin.Engine {
 		douyinGroup.POST("/user/login/", controller.UserLogin)
 		// 用户接口
 		douyinGroup.GET("/user/", controller.UserInfo)
+		// 视频投稿
+		douyinGroup.POST("/publish/action/", controller.PublishAction)
 	}
 	return r
 }

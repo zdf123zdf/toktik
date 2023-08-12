@@ -42,8 +42,10 @@ type FeedUser struct {
 
 func GetFeed(c *gin.Context) {
 	var response FeedResponse
+	response.StatusCode = -1
 	// 获取token和latest_time
-	//token := c.Query("token")
+	token := c.Query("token")
+	fmt.Println("token", token)
 	latestTimeStr := c.Query("latest_time")
 	// 将时间戳转为时间格式
 	var latestTime time.Time
@@ -52,7 +54,6 @@ func GetFeed(c *gin.Context) {
 		// 将时间戳字符串转换为整数
 		timestamp, err := strconv.ParseInt(latestTimeStr, 10, 64)
 		if err != nil {
-			response.StatusCode = -1
 			response.StatusMsg = "时间戳格式错误"
 			response.NextTime = latestTime.UnixMilli() // 毫秒时间戳
 			c.JSON(http.StatusBadRequest, response)    // 400状态
@@ -64,13 +65,11 @@ func GetFeed(c *gin.Context) {
 	// 从service取数据
 	videoList, err := service.FeedGet(latestTime)
 	if err != nil {
-		response.StatusCode = -1
 		response.StatusMsg = "获取数据失败"
 		response.NextTime = latestTime.UnixMilli()
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
-	fmt.Println(videoList)
 	response.StatusCode = 0
 	response.StatusMsg = "success"
 	response.NextTime = latestTime.UnixMilli()

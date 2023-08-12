@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/uuid v1.3.0
+	github.com/h2non/filetype v1.1.3
 	github.com/minio/minio-go/v7 v7.0.61
 	github.com/spf13/viper v1.16.0
 	gorm.io/driver/mysql v1.5.1
