@@ -10,6 +10,7 @@ import (
 func FeedGet(latestTime time.Time) (articleList []*model.Video, err error) {
 	// 初始化 articleList 为一个空的切片
 	articleList = make([]*model.Video, 0)
-	err = db.DB.Order("created_at desc").Where("created_at <= ?", latestTime).Limit(30).Find(&articleList).Error
+	// 使用Preload("User")来预加载用户信息
+	err = db.DB.Preload("User").Order("created_at desc").Where("created_at <= ?", latestTime).Limit(30).Find(&articleList).Error
 	return
 }
