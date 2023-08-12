@@ -16,14 +16,14 @@ type FeedVideo struct {
 	CoverUrl      string   `json:"cover_url,omitempty"`
 	FavoriteCount uint     `json:"favorite_count,omitempty"`
 	CommentCount  uint     `json:"comment_count,omitempty"`
-	IsFavorite    bool     `json:"is_favorite,omitempty"`
+	IsFavorite    bool     `json:"is_favorite,omitempty"` // 是否点赞
 	Title         string   `json:"title,omitempty"`
 }
 
 type FeedResponse struct {
 	Response
 	VideoList []FeedVideo `json:"video_list,omitempty"`
-	NextTime  uint        `json:"next_time,omitempty"`
+	NextTime  int64       `json:"next_time,omitempty"`
 }
 
 type FeedUser struct {
@@ -41,54 +41,72 @@ type FeedUser struct {
 }
 
 func GetFeed(c *gin.Context) {
+	var response FeedResponse
 	// 获取token和latest_time
 	//token := c.Query("token")
 	latestTimeStr := c.Query("latest_time")
 	// 将时间戳转为时间格式
 	var latestTime time.Time
+	latestTime = time.Now()
 	if latestTimeStr != "" {
 		// 将时间戳字符串转换为整数
 		timestamp, err := strconv.ParseInt(latestTimeStr, 10, 64)
 		if err != nil {
-			fmt.Println("时间戳格式错误:", err)
+			response.StatusCode = -1
+			response.StatusMsg = "时间戳格式错误"
+			response.NextTime = latestTime.UnixMilli() // 毫秒时间戳
+			c.JSON(http.StatusBadRequest, response)    // 400状态
 			return
 		}
-
 		// 处理毫秒时间戳
 		latestTime = time.Unix(0, timestamp*int64(time.Millisecond))
-
-	} else {
-		latestTime = time.Now()
 	}
 	// 从service取数据
 	videoList, err := service.FeedGet(latestTime)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, nil)
+		response.StatusCode = -1
+		response.StatusMsg = "获取数据失败"
+		response.NextTime = latestTime.UnixMilli()
+		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 	fmt.Println(videoList)
-	// 示例数据
-	response := FeedResponse{
-		Response: Response{
-			StatusCode: 0,
-			StatusMsg:  "Success",
-		},
-		VideoList: []FeedVideo{
-			{
-				Id:       1,
-				Author:   FeedUser{Id: 1, Name: "John Doe"},
-				PlayUrl:  "https://example.com/video/1",
-				CoverUrl: "https://example.com/cover/1",
-			},
-			{
-				Id:       2,
-				Author:   FeedUser{Id: 2, Name: "Jane Smith"},
-				PlayUrl:  "https://example.com/video/2",
-				CoverUrl: "https://example.com/cover/2",
-			},
-		},
-		NextTime: 1691644322647,
-	}
-	c.JSON(http.StatusOK, response)
+	response.StatusCode = 0
+	response.StatusMsg = "success"
+	response.NextTime = latestTime.UnixMilli()
 
+	feedVideos := make([]FeedVideo, 0)
+	for _, video := range videoList {
+		// 取出视频信息
+		// 获取作者用户信息
+		author := FeedUser{
+			Id:              video.User.ID,
+			Name:            video.User.Name,
+			FollowCount:     video.User.FollowCount,
+			FollowerCount:   video.User.FollowerCount,
+			IsFollow:        true, // 未实现查询
+			Avatar:          video.User.Avatar,
+			BackgroundImage: video.User.BackgroundImage,
+			Signature:       video.User.Signature,
+			TotalFavorited:  video.User.TotalFavorited,
+			WorkCount:       0, // 未实现查询
+			FavoriteCount:   0, // 未实现查询
+		}
+		// 创建FeedVideo对象
+		feedVideo := FeedVideo{
+			Id:            video.ID,
+			Author:        author,
+			PlayUrl:       video.PlayUrl,
+			CoverUrl:      video.CoverUrl,
+			FavoriteCount: video.FavoriteCount,
+			CommentCount:  video.CommentCount,
+			IsFavorite:    false, // 未实现查询
+			Title:         video.Title,
+		}
+
+		// 将FeedVideo添加到feedVideos中
+		feedVideos = append(feedVideos, feedVideo)
+	}
+	response.VideoList = feedVideos
+	c.JSON(http.StatusOK, response)
 }
