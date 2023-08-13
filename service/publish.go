@@ -34,3 +34,12 @@ func CreateVideo(video model.Video) error {
 	}
 	return nil
 }
+
+// 获取用户发布视频列表
+func GetPublish(userID uint) (publishList []*model.Video, err error) {
+	// 查询用户的所有视频记录
+	if err = db.DB.Preload("User").Where("user_id = ?", userID).Find(&publishList).Error; err != nil {
+		return nil, err
+	}
+	return
+}

@@ -6,7 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
+	"time"
 	"toktik/dao/db"
+	"toktik/dao/redis"
 	"toktik/model"
 )
 
@@ -53,17 +56,30 @@ func UserRegister(c *gin.Context) {
 		Name:     username,
 		Password: hashpassword,
 	}
-
+	// 创建数据库事务 出现错误，使用事务回滚
+	tx := db.DB.Begin()
 	// 使用 GORM 的 Create 方法来创建用户
 	if err := db.DB.Create(&newUser).Error; err != nil {
 		// 处理错误
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Failed to create user"},
 		})
 		return
 	}
-	// 存储token
-
+	// 存储token 到 Redis
+	userID := newUser.ID         // 获取创建用户的ID
+	expiration := time.Hour * 24 // 24小时过期
+	err = redis.Redisdb.Set(strconv.Itoa(int(userID)), token, expiration).Err()
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, UserLoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Failed to create user"},
+		})
+		return
+	}
+	// 提交事务
+	tx.Commit()
 	// 返回响应
 	c.JSON(http.StatusOK, UserLoginResponse{
 		Response: Response{StatusCode: 0},
@@ -95,7 +111,15 @@ func UserLogin(c *gin.Context) {
 		if isMatch {
 			fmt.Println("good job")
 			// 存储token
-
+			userID := user.ID
+			expiration := time.Hour * 24 // 24小时过期
+			err = redis.Redisdb.Set(strconv.Itoa(int(userID)), token, expiration).Err()
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, UserLoginResponse{
+					Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+				})
+				return
+			}
 			// 返回响应
 			c.JSON(http.StatusOK, UserLoginResponse{
 				Response: Response{StatusCode: 0},

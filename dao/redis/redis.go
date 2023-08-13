@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var redisdb *redis.Client
+var Redisdb *redis.Client
 
 func InitRedis() (err error) {
 	// 读取配置文件
@@ -14,11 +14,11 @@ func InitRedis() (err error) {
 	port := viper.GetInt("redis.port")
 	password := viper.GetString("redis.password")
 	db := viper.GetInt("redis.db") // Redis数据库索引
-	redisdb = redis.NewClient(&redis.Options{
+	Redisdb = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", host, port),
 		Password: password,
 		DB:       db,
 	})
-	_, err = redisdb.Ping().Result()
+	_, err = Redisdb.Ping().Result()
 	return
 }
