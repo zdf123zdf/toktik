@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 func HashPassword(password string) (string, error) {
@@ -22,8 +21,7 @@ func CheckPassword(password, hash string) bool {
 func GenerateToken(username string) (string, error) {
 	// 设置Claims
 	claims := jwt.MapClaims{
-		"name": username,                              // 用户名
-		"exp":  time.Now().Add(time.Hour * 24).Unix(), // 令牌过期时间，24小时后
+		"name": username, // 用户名
 	}
 
 	// 设置密钥
