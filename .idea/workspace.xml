@@ -7,6 +7,7 @@
     <list default="true" id="fdc5c95d-e6ad-4c5a-95f1-96ef317221da" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controller/User.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/User.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/encryption.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/encryption.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

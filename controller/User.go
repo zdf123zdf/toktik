@@ -83,7 +83,7 @@ func UserRegister(c *gin.Context) {
 	// 返回响应
 	c.JSON(http.StatusOK, UserLoginResponse{
 		Response: Response{StatusCode: 0},
-		UserId:   int64(user.ID),
+		UserId:   int64(newUser.ID),
 		Token:    token,
 	})
 }
@@ -91,25 +91,20 @@ func UserRegister(c *gin.Context) {
 func UserLogin(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
-	fmt.Println(c)
-	fmt.Println(username)
-
-	token := username + password
-	//计算token
-	token, err := GenerateToken(username)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
 
 	var user model.User
-	fmt.Println(username)
 	if err := db.DB.Where("name = ?", username).First(&user).Error; err == nil {
 		// 检验密码是否正确
 		storedPassword := user.Password
 		isMatch := CheckPassword(password, storedPassword)
 		if isMatch {
-			fmt.Println("good job")
+			//fmt.Println("good job")
+			// 计算token
+			token, err := GenerateToken(username)
+			if err != nil {
+				//fmt.Println("Error:", err)
+				return
+			}
 			// 存储token
 			userID := user.ID
 			expiration := time.Hour * 24 // 24小时过期
@@ -146,23 +141,35 @@ func UserLogin(c *gin.Context) {
 }
 
 func UserInfo(c *gin.Context) {
-	username := c.Query("username")
-	fmt.Printf("username:%s\n", username)
+	userId := c.Query("user_id")
+	//token := c.Query("token")
+
 	var user model.User
-	if err := db.DB.Where("name = ?", username).First(&user).Error; err != nil {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
-		})
-	} else {
-		var userinfo = UserInfos{
-			Id:            int64(user.ID),
-			Name:          username,
-			FollowCount:   0,
-			FollowerCount: 0,
+	// 查询userid对应的token
+
+	// 检测token
+
+	// 查找信息
+	if err := db.DB.First(&user, userId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("未找到用户")
+		} else {
+			fmt.Printf("查询用户时出错：%v\n", err)
 		}
-		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 0},
-			User:     userinfo,
-		})
+		return
 	}
+
+	// 在 user 变量中包含了查询到的具有给定ID的用户信息
+	//fmt.Printf("用户信息：%+v\n", user)
+	var userinfo = UserInfos{
+		Id:            int64(user.ID),
+		Name:          user.Name,
+		FollowCount:   int64(user.FollowCount),
+		FollowerCount: int64(user.FollowerCount),
+		IsFollow:      true,
+	}
+	c.JSON(http.StatusOK, UserResponse{
+		Response: Response{StatusCode: 0},
+		User:     userinfo,
+	})
 }
