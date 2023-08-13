@@ -18,10 +18,11 @@ func CheckPassword(password, hash string) bool {
 	return err == nil
 }
 
-func GenerateToken(username string) (string, error) {
+func GenerateToken(username string, userID uint) (string, error) {
 	// 设置Claims
 	claims := jwt.MapClaims{
-		"name": username, // 用户名
+		"username": username, // 用户名
+		"user_id":  userID,   // 用户ID
 	}
 
 	// 设置密钥

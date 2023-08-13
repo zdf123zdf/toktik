@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"toktik/controller"
+	"toktik/middleware"
 )
 
 func InitRouter() *gin.Engine {
@@ -16,7 +17,7 @@ func InitRouter() *gin.Engine {
 		userGroup := toktikGroup.Group("/user")
 		{
 			// 用户接口
-			userGroup.GET("/", controller.UserInfo)
+			userGroup.GET("/", middleware.AuthMiddleware(), controller.UserInfo)
 			// 注册接口
 			userGroup.POST("/register/", controller.UserRegister)
 			// 登录接口
@@ -26,9 +27,9 @@ func InitRouter() *gin.Engine {
 		publishGroup := toktikGroup.Group("/publish")
 		{
 			// 视频投稿
-			publishGroup.POST("/action/", controller.PublishAction)
+			publishGroup.POST("/action/", middleware.AuthMiddleware(), controller.PublishAction)
 			// 视频发布列表
-			publishGroup.GET("/list/", controller.PublishList)
+			publishGroup.GET("/list/", middleware.AuthMiddleware(), controller.PublishList)
 		}
 
 	}

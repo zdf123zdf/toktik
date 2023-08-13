@@ -34,13 +34,6 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
-	// 计算token
-	token, err := GenerateToken(username)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
 	// 如果name已经存在，则返回StatusCode: 1(失败)和"User already exist"
 	var user model.User
 	if err := db.DB.Where("name = ?", username).First(&user).Error; err == nil {
@@ -67,6 +60,14 @@ func UserRegister(c *gin.Context) {
 		})
 		return
 	}
+
+	// 计算token
+	token, err := GenerateToken(username, newUser.ID)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
 	// 存储token 到 Redis
 	userID := newUser.ID         // 获取创建用户的ID
 	expiration := time.Hour * 24 // 24小时过期
@@ -100,7 +101,7 @@ func UserLogin(c *gin.Context) {
 		if isMatch {
 			//fmt.Println("good job")
 			// 计算token
-			token, err := GenerateToken(username)
+			token, err := GenerateToken(username, user.ID)
 			if err != nil {
 				//fmt.Println("Error:", err)
 				return
@@ -141,14 +142,11 @@ func UserLogin(c *gin.Context) {
 }
 
 func UserInfo(c *gin.Context) {
-	userId := c.Query("user_id")
+	userId := c.GetUint("user_id") // 从上下文中获取
+	//userId := c.Query("user_id")
 	//token := c.Query("token")
 
 	var user model.User
-	// 查询userid对应的token
-
-	// 检测token
-
 	// 查找信息
 	if err := db.DB.First(&user, userId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

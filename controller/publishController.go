@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/h2non/filetype"
 	"io"
@@ -18,9 +17,8 @@ import (
 func PublishAction(c *gin.Context) {
 	var response Response
 	response.StatusCode = -1
-	// 获取用户token
-	token := c.PostForm("token")
-	fmt.Println(token)
+	// 获取用户ID
+	userId := c.GetUint("user_id") // 从上下文中获取
 	// 获取视频
 	title := c.PostForm("title")
 	if title == "" {
@@ -109,7 +107,7 @@ func PublishAction(c *gin.Context) {
 		FavoriteCount: 0,
 		CommentCount:  0,
 		Title:         title,
-		UserID:        1, // 视频作者ID 目前定义死，后面修改
+		UserID:        userId, // 视频作者ID
 	}
 	err = service.CreateVideo(video)
 	if err != nil {
@@ -132,9 +130,9 @@ func PublishList(c *gin.Context) {
 	var response PublishResponse
 	response.StatusCode = -1
 	// 获取用户ID
+	userId := c.GetUint("user_id") // 从上下文中获取
 	// 根据用户ID查询所有视频
-	userID := 1
-	publishList, err := service.GetPublish(uint(userID))
+	publishList, err := service.GetPublish(userId)
 	if err != nil {
 		response.StatusMsg = "视频获取失败"
 		c.JSON(http.StatusInternalServerError, response)
