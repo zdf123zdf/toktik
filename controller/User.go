@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"toktik/dao/db"
 	"toktik/model"
@@ -73,8 +75,11 @@ func UserRegister(c *gin.Context) {
 func UserLogin(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
+	fmt.Println(c)
+	fmt.Println(username)
 
-	// 计算token
+	token := username + password
+	//计算token
 	token, err := GenerateToken(username)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -82,15 +87,13 @@ func UserLogin(c *gin.Context) {
 	}
 
 	var user model.User
-	if err := db.DB.Where("name = ?", username).First(&user).Error; err != nil {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
-		})
-	} else {
+	fmt.Println(username)
+	if err := db.DB.Where("name = ?", username).First(&user).Error; err == nil {
 		// 检验密码是否正确
 		storedPassword := user.Password
 		isMatch := CheckPassword(password, storedPassword)
 		if isMatch {
+			fmt.Println("good job")
 			// 存储token
 
 			// 返回响应
@@ -99,16 +102,28 @@ func UserLogin(c *gin.Context) {
 				UserId:   int64(user.ID),
 				Token:    token,
 			})
+
 		} else {
+			fmt.Println("Wrong password")
 			c.JSON(http.StatusOK, UserLoginResponse{
 				Response: Response{StatusCode: 1, StatusMsg: "Wrong password"},
 			})
 		}
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+		})
+	} else {
+		fmt.Println("Failed to login user")
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Failed to login user"},
+		})
 	}
 }
 
 func UserInfo(c *gin.Context) {
 	username := c.Query("username")
+	fmt.Printf("username:%s\n", username)
 	var user model.User
 	if err := db.DB.Where("name = ?", username).First(&user).Error; err != nil {
 		c.JSON(http.StatusOK, UserResponse{
