@@ -21,6 +21,17 @@ type UserInfos struct {
 	IsFollow      bool   `json:"is_follow,omitempty"`
 }
 
+type UserLoginResponse struct {
+	Response
+	UserId int64  `json:"user_id,omitempty"`
+	Token  string `json:"token"`
+}
+
+type UserResponse struct {
+	Response
+	User UserInfos `json:"user"`
+}
+
 func UserRegister(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
@@ -99,7 +110,6 @@ func UserLogin(c *gin.Context) {
 		storedPassword := user.Password
 		isMatch := CheckPassword(password, storedPassword)
 		if isMatch {
-			//fmt.Println("good job")
 			// 计算token
 			token, err := GenerateToken(username, user.ID)
 			if err != nil {
@@ -124,7 +134,6 @@ func UserLogin(c *gin.Context) {
 			})
 
 		} else {
-			fmt.Println("Wrong password")
 			c.JSON(http.StatusOK, UserLoginResponse{
 				Response: Response{StatusCode: 1, StatusMsg: "Wrong password"},
 			})
@@ -134,7 +143,6 @@ func UserLogin(c *gin.Context) {
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	} else {
-		fmt.Println("Failed to login user")
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Failed to login user"},
 		})
@@ -143,22 +151,23 @@ func UserLogin(c *gin.Context) {
 
 func UserInfo(c *gin.Context) {
 	userId := c.GetUint("user_id") // 从上下文中获取
-	//userId := c.Query("user_id")
-	//token := c.Query("token")
 
 	var user model.User
 	// 查找信息
 	if err := db.DB.First(&user, userId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			fmt.Println("未找到用户")
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: Response{StatusCode: 1, StatusMsg: "user not found"},
+			})
 		} else {
-			fmt.Printf("查询用户时出错：%v\n", err)
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: Response{StatusCode: 1, StatusMsg: "querying users error"},
+			})
 		}
 		return
 	}
 
 	// 在 user 变量中包含了查询到的具有给定ID的用户信息
-	//fmt.Printf("用户信息：%+v\n", user)
 	var userinfo = UserInfos{
 		Id:            int64(user.ID),
 		Name:          user.Name,

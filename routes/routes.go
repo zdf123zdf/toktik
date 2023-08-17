@@ -31,6 +31,23 @@ func InitRouter() *gin.Engine {
 			// 视频发布列表
 			publishGroup.GET("/list/", middleware.AuthMiddleware(), controller.PublishList)
 		}
+		// favorite路由组
+		favoriteGroup := toktikGroup.Group("/favorite")
+		{
+			// 赞操作
+			favoriteGroup.POST("/action", middleware.AuthMiddleware(), controller.FavoriteAction)
+			// 喜欢列表
+			favoriteGroup.GET("/list", middleware.AuthMiddleware(), controller.FavoriteList)
+
+		}
+		// comment 路由组
+		commentGroup := toktikGroup.Group("/comment")
+		{
+			// 评论操作
+			commentGroup.POST("/action", middleware.AuthMiddleware(), controller.CommentAction)
+			// 视频评论列表
+			commentGroup.GET("/list", middleware.AuthMiddleware(), controller.CommentList)
+		}
 
 	}
 	return r
